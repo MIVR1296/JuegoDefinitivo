@@ -18,10 +18,18 @@
 	mov dx, %1 ; mueva el parámetro de entrada al registro de datos "dx"
 	mov cx, 16 ; mueva el valor al registro contador "cx"
 print_reg_loop:
-	push cx
-	mov al, '0'
-	test dh, 10000000b
-	jz print_reg_do
+	push cx ; La instrucción PUSH decrementa en dos el valor deL registro apuntador de pila
+	;y posteriormente transfiere el contenido del operando fuente a la nueva dirección resultante en el registro recién modificado.
+	mov al, '0' ; mueve '0' a la parte baja del registro acomulador
+	test dh, 10000000b ;
+	
+	;_____________________________________________________________________
+        ;TEST: Realiza una conjunción, bit por bit, de los operandos, 
+        ;a diferencia del "and"  no coloca el resultado en el operando destino, 
+        ; sino que solo tiene efecto sobre el estado de las banderas
+        ;____________________________________________________________________
+       
+	jz print_reg_do ; Si la vandera es cero salta a la etiqueta print_reg_do
 	mov al, '1'
 print_reg_do:
 	mov bx, 0x0006             ; page = 0 (BH), color = gray on black (BL)

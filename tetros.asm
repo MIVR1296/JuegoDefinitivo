@@ -30,28 +30,28 @@ print_reg_loop:
         ;____________________________________________________________________
        
 	jz print_reg_do ; Si la vandera es cero salta a la etiqueta print_reg_do
-	mov al, '1'
+	mov al, '1' ;  mueve '1' a la parte baja del registro acomulador
 print_reg_do:
-	mov bx, 0x0006             ; page = 0 (BH), color = gray on black (BL)
-	mov ah, 0x09               ; write character stored in AL
-	mov cx, 1
+	mov bx, 0x0006             ; página = 0 (BH), color = gris en negro (BL)
+	mov ah, 0x09               ; Escribir el caracter almacenado en AL
+	mov cx, 1                  ; Mueve el valor de 1 al registro contador
+	int 0x10                   ; Esta interrupción se utiliza para mostrar texto en la pantalla (sin la necesidad de llamar a la int 80), para cambiar a modo gráfico, para establecer la paleta de colores, etc...
+	mov ah, 3                  ; mover el cursor una columna hacia adelante
+	int 0x10		   ; Se vuelve a mostrar el texto en pantalla
+	inc dx                     ; La instrucción suma 1 al operando destino y guarda el resultado en el mismo operando destino.
+	mov ah, 2                  ; Establecer cursor
 	int 0x10
-	mov ah, 3                  ; move cursor one column forward
-	int 0x10
-	inc dx
-	mov ah, 2                  ; set cursor
-	int 0x10
-	pop cx
-	shl dx, 1
-	loop print_reg_loop
+	pop cx                     ; Toma de la pila el último valor
+	shl dx, 1                  ; Desplazamiento de 1 bit a la izquierda
+	loop print_reg_loop        
 	jmp $
 %endmacro
 ;----------------------------------------------------------------------------------------------
-; ==============================================================================
-; MACROS
-; ==============================================================================
-
-; Sleeps for the given number of microseconds.
+;--------------------------------  MACRO #1  --------------------------------------------------
+;Macro-1: sleep.
+;	Recibe 1 parametro de entrada:	
+;       Pausar por una determinada cantidad de microsegundos
+;----------------------------------------------------------------------------------------------
 %macro sleep 1
 	pusha
 	xor cx, cx
@@ -60,6 +60,7 @@ print_reg_do:
 	int 0x15
 	popa
 %endmacro
+;-----------------------------------------------------------------------------------------------
 
 ; Choose a brick at random.
 %macro select_brick 0

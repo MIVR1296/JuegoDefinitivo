@@ -53,12 +53,12 @@ print_reg_do:
 ;       Pausar por una determinada cantidad de microsegundos
 ;----------------------------------------------------------------------------------------------
 %macro sleep 1
-	pusha
-	xor cx, cx
-	mov dx, %1
-	mov ah, 0x86
-	int 0x15
-	popa
+	pusha ; Almacena en la pila los registros básicos y se sigue este orden : AX,CX,DX,BX,SP,BP,SI,DI
+	xor cx, cx ; limpieza del registro contador "cx"
+	mov dx, %1 ; mueve al registro de datos la entrada del macro
+	mov ah, 0x86 ; 	Esperar intervalo de microsegundos (BIOS)
+	int 0x15	 ; interrupción de tiempo
+	popa      ; extrae de la pila los registros básicos (orden ibversi ak pusha
 %endmacro
 ;-----------------------------------------------------------------------------------------------
 

@@ -40,7 +40,7 @@ print_reg_do:
 	int 0x10		   ; Se vuelve a mostrar el texto en pantalla
 	inc dx                     ; La instrucción suma 1 al operando destino y guarda el resultado en el mismo operando destino.
 	mov ah, 2                  ; Establecer cursor
-	int 0x10
+	int 0x10		   ; Esta interrupción se utiliza para mostrar texto en la pantalla
 	pop cx                     ; Toma de la pila el último valor
 	shl dx, 1                  ; Desplazamiento de 1 bit a la izquierda
 	loop print_reg_loop        
@@ -84,15 +84,20 @@ print_reg_do:
         ; mov al, dl
 %endmacro
 ;---------------------------------------------------------------------------------------------------------
-; Sets video mode and hides cursor.
+;--------------------------------  MACRO #4  -------------------------------------------------------------
+;Macro-4: clear_screen
+;	Recibe 1 parametro de entrada:	
+;        Establece el modo de video y oculta el cursor
+;---------------------------------------------------------------------------------------------------------
+; Establece el modo de video y oculta el cursor
 %macro clear_screen 0
-	xor ax, ax                   ; clear screen (40x25)
-	int 0x10
-	mov ah, 1                    ; hide cursor
+	xor ax, ax   ; Limpia la pantalla de (40x25)
+	int 0x10     ; Esta interrupción se utiliza para mostrar texto en la pantalla
+	mov ah, 1    ; Ocultar el cursor
 	mov cx, 0x2607
-	int 0x10
+	int 0x10     ; Esta interrupción se utiliza para mostrar texto en la pantalla (control de pantalla)
 %endmacro
-
+;---------------------------------------------------------------------------------------------------------
 field_left_col:  equ 13
 field_width:     equ 14
 inner_width:     equ 12

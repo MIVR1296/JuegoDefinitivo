@@ -47,11 +47,11 @@ print_reg_do:
 	jmp $
 %endmacro
 ;----------------------------------------------------------------------------------------------
-;--------------------------------  MACRO #1  --------------------------------------------------
-;Macro-1: sleep.
+;--------------------------------  MACRO #2  --------------------------------------------------
+;Macro-2: sleep.
 ;	Recibe 1 parametro de entrada:	
 ;       Pausar por una determinada cantidad de microsegundos
-;----------------------------------------------------------------------------------------------
+;---------------------------------------------------------------------------------------------------------
 %macro sleep 1
 	pusha ; Almacena en la pila los registros básicos y se sigue este orden : AX,CX,DX,BX,SP,BP,SI,DI
 	xor cx, cx ; limpieza del registro contador "cx"
@@ -60,25 +60,30 @@ print_reg_do:
 	int 0x15	 ; interrupción de tiempo
 	popa      ; extrae de la pila los registros básicos (orden ibversi ak pusha
 %endmacro
-;-----------------------------------------------------------------------------------------------
-
-; Choose a brick at random.
+;---------------------------------------------------------------------------------------------------------
+;--------------------------------  MACRO #3  -------------------------------------------------------------
+;Macro-3: select_brick
+;	Recibe 1 parametro de entrada:	
+;       Selección de un bloque de manera aleatoria
+;---------------------------------------------------------------------------------------------------------
 %macro select_brick 0
-	mov ah, 2                    ; get current time
+	mov ah, 2  ;  con la "int 0x1a" se obtiene la hora actual del sistema
 	int 0x1a
 	mov al, byte [seed_value]
 	xor ax, dx
 	mov bl, 31
 	mul bx
-	inc ax
+	inc ax ; La instrucción suma 1 al operando destino y guarda el resultado en el mismo operando destino.
 	mov byte [seed_value], al
 	xor dx, dx
 	mov bx, 7
 	div bx
-	shl dl, 3
-	xchg ax, dx                  ; mov al, dl
+	shl dl, 3 ; 
+	xchg ax, dx; Intercambia el contenido de dos registros, o bien el contenido de un registro y el de una posición de memoria.
+	;Sintaxis: XCHG registro, registro/memoria                 
+        ; mov al, dl
 %endmacro
-
+;---------------------------------------------------------------------------------------------------------
 ; Sets video mode and hides cursor.
 %macro clear_screen 0
 	xor ax, ax                   ; clear screen (40x25)

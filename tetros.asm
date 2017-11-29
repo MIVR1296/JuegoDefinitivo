@@ -62,8 +62,7 @@ print_reg_do:
 %endmacro
 ;---------------------------------------------------------------------------------------------------------
 ;--------------------------------  MACRO #3  -------------------------------------------------------------
-;Macro-3: select_brick
-;	Recibe 1 parametro de entrada:	
+;Macro-3: select_brick	
 ;       Selección de un bloque de manera aleatoria
 ;---------------------------------------------------------------------------------------------------------
 %macro select_brick 0
@@ -86,10 +85,8 @@ print_reg_do:
 ;---------------------------------------------------------------------------------------------------------
 ;--------------------------------  MACRO #4  -------------------------------------------------------------
 ;Macro-4: clear_screen
-;	Recibe 1 parametro de entrada:	
 ;        Establece el modo de video y oculta el cursor
 ;---------------------------------------------------------------------------------------------------------
-; Establece el modo de video y oculta el cursor
 %macro clear_screen 0
 	xor ax, ax   ; Limpia la pantalla de (40x25)
 	int 0x10     ; Esta interrupción se utiliza para mostrar texto en la pantalla
@@ -101,30 +98,33 @@ print_reg_do:
 ;*********************************************************************************************************
 ;*                                      Variables sin inicializar                                        *
 ;*********************************************************************************************************
-field_left_col:  equ 13
-field_width:     equ 14
+field_left_col:  equ 13  ; Columna izquierda
+field_width:     equ 14  
 inner_width:     equ 12
-inner_first_col: equ 14
-start_row_col:   equ 0x0412
+inner_first_col: equ 14  ; primera columna
+start_row_col:   equ 0x0412 ;fila y columna
 ;*********************************************************************************************************
-
+;--------------------------------  MACRO #5  -------------------------------------------------------------
+;Macro-5: Init_screen
+;       Inicializa la pantalla
+;---------------------------------------------------------------------------------------------------------
 %macro init_screen 0
-	clear_screen
-	mov dh, 3                        ; row
-	mov cx, 18                       ; number of rows
-ia: push cx
-	inc dh                           ; increment row
-	mov dl, field_left_col           ; set column
-	mov cx, field_width              ; width of box
+	clear_screen			 ; Se llama al macro para limpiar la pantalla
+	mov dh, 3                        ; fila
+	mov cx, 18                       ; número de filas 
+ia: push cx				 ; 
+	inc dh                           ; incrementa la fila
+	mov dl, field_left_col           ; Establecer columna
+	mov cx, field_width              ; Ancho de caja
 	mov bx, 0x78                     ; color
 	call set_and_write
-	cmp dh, 21                       ; don't remove last line
-	je ib                            ; if last line jump
-	inc dx                           ; increase column
-	mov cx, inner_width              ; width of box
+	cmp dh, 21                       ; No eliminar la última línea
+	je ib                            ; Si llega a la última línea, salta
+	inc dx                           ; Incrementar la columna
+	mov cx, inner_width              ; Ancho de caja
 	xor bx, bx                       ; color
-	call set_and_write
-ib: pop cx
+	call set_and_write               
+ib: pop cx                               ; transfiere el último valor almacenado en la pila
 	loop ia
 %endmacro
 

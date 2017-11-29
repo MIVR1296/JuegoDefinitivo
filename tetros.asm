@@ -165,22 +165,23 @@ wait_a:
 	sleep 3000                       ; Se llama al macro para esperar 3ms
 
 	push ax			         
-	mov ah, 1                        ; check for keystroke; AX modified
-	int 0x16                         ; http://www.ctyme.com/intr/rb-1755.htm
+	mov ah, 1                        ; comprobar si hay pulsación de tecla; AX modificado
+					
+	int 0x16                         ;  Esta interrupción se encarga de controlar el teclado del PC.
 	mov cx, ax
 	pop ax
-	jz no_key                    ; no keystroke
-	call clear_brick
-                                 ; 4b left, 48 up, 4d right, 50 down
-	cmp ch, 0x4b                 ; left arrow
-	je left_arrow                ; http://stackoverflow.com/questions/16939449/how-to-detect-arrow-keys-in-assembly
-	cmp ch, 0x48                 ; up arrow
+	jz no_key                    ; Si no se presiona una tecla
+	call clear_brick             ; llamada a al macro para borrar el ladrillo
+                                     ; 4b left, 48 up, 4d right, 50 down
+	cmp ch, 0x4b                 ; flecha izquierda
+	je left_arrow                ; 
+	cmp ch, 0x48                 ; flecha derecha
 	je up_arrow
 	cmp ch, 0x4d
-	je right_arrow
+	je right_arrow               ; Salto a la etiqueta right_arrow 
 
-	mov byte [delay], 10         ; every other key is fast down
-	jmp clear_keys
+	mov byte [delay], 10         ; cualquier otra tecla es para bajar rápido el ladrillo
+	jmp clear_keys               ; salto a limpieza de tecla
 left_arrow:
 	dec dx
 	call check_collision

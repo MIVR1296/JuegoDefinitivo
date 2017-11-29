@@ -134,16 +134,23 @@ ib: pop cx                               ; transfiere el último valor almacenad
 delay:      equ 0x7f00
 seed_value: equ 0x7f02
 ;*********************************************************************************************************
+
+;*********************************************************************************************************
+;*                                            Segmento de código                                         *
+;*********************************************************************************************************
 section .text
 
-start_tetris:
-	xor ax, ax
-	mov ds, ax
-	init_screen
-new_brick:
-	mov byte [delay], 100            ; 3 * 100 = 300ms
+;_________________________________________________________________________________________________________
+start_tetris:   ; Etiqueta para iniciar el juego
+	xor ax, ax ; Limpieza del registro acomulador
+	mov ds, ax ; mueve lo que hay en el registro acomulador al registro de segmento de datos
+	init_screen ; Se llama al macro que inicializa la pantalla
+;_________________________________________________________________________________________________________
+new_brick: ; Etiqueta para crear un nuevo ladrillo
+	mov byte [delay], 100            ;  calculo para un delay de (3 * 100) 300ms
 	select_brick                     ; returns the selected brick in AL
 	mov dx, start_row_col            ; start at row 4 and col 38
+;_________________________________________________________________________________________________________	
 lp:
 	call check_collision
 	jne $                            ; collision -> game over

@@ -116,7 +116,7 @@ ia: push cx				 ;
 	inc dh                           ; incrementa la fila
 	mov dl, field_left_col           ; Establecer columna
 	mov cx, field_width              ; Ancho de caja
-	mov bx, 0x78                     ; color
+	mov bx, 0x33                     ; color turquesa para los bordes del juego
 	call set_and_write
 	cmp dh, 21                       ; No eliminar la última línea
 	je ib                            ; Si llega a la última línea, salta

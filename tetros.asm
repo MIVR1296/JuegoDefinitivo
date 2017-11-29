@@ -148,24 +148,25 @@ start_tetris:   ; Etiqueta para iniciar el juego
 ;_________________________________________________________________________________________________________
 new_brick: ; Etiqueta para crear un nuevo ladrillo
 	mov byte [delay], 100            ;  calculo para un delay de (3 * 100) 300ms
-	select_brick                     ; returns the selected brick in AL
-	mov dx, start_row_col            ; start at row 4 and col 38
-;_________________________________________________________________________________________________________	
-lp:
+	select_brick                     ; Devuelve el ladrillo seleccionado en AL
+	mov dx, start_row_col            ; inicia en la fila 4,  columna 38
+;_________________________________________________________________________________________________________
+lp: ; Etiqueta para chequear la colisión y establecer se pierde la partida
 	call check_collision
-	jne $                            ; collision -> game over
-	call print_brick
+	jne $                            ; En caso de colisión se finaliza el juego
+	call print_brick	         ; Si no entonces se imprime otro bloque
+;________________________________________________________________________________________________________
+wait_or_keyboard: ; espera o teclado:
+	xor cx, cx 
+	mov cl, byte [delay] 
+;________________________________________________________________________________________________________
+wait_a:         
+	push cx 
+	sleep 3000                       ; Se llama al macro para esperar 3ms
 
-wait_or_keyboard:
-	xor cx, cx
-	mov cl, byte [delay]
-wait_a:
-	push cx
-	sleep 3000                       ; wait 3ms
-
-	push ax
-	mov ah, 1                    ; check for keystroke; AX modified
-	int 0x16                     ; http://www.ctyme.com/intr/rb-1755.htm
+	push ax			         
+	mov ah, 1                        ; check for keystroke; AX modified
+	int 0x16                         ; http://www.ctyme.com/intr/rb-1755.htm
 	mov cx, ax
 	pop ax
 	jz no_key                    ; no keystroke

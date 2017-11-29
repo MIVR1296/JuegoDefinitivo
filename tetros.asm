@@ -98,11 +98,15 @@ print_reg_do:
 	int 0x10     ; Esta interrupción se utiliza para mostrar texto en la pantalla (control de pantalla)
 %endmacro
 ;---------------------------------------------------------------------------------------------------------
+;*********************************************************************************************************
+;*                                      Variables sin inicializar                                        *
+;*********************************************************************************************************
 field_left_col:  equ 13
 field_width:     equ 14
 inner_width:     equ 12
 inner_first_col: equ 14
 start_row_col:   equ 0x0412
+;*********************************************************************************************************
 
 %macro init_screen 0
 	clear_screen

@@ -185,13 +185,13 @@ wait_a:
 left_arrow:
 	dec dx
 	call check_collision
-	je clear_keys                 ; no collision
+	je clear_keys                 ; no colision
 	inc dx
 	jmp clear_keys
 right_arrow:
 	inc dx
 	call check_collision
-	je clear_keys                ; no collision
+	je clear_keys                ; no colision
 	dec dx
 	jmp clear_keys
 up_arrow:
@@ -202,12 +202,12 @@ up_arrow:
 	jnz nf                       ; no overflow
 	sub al, 8
 nf: call check_collision
-	je clear_keys                ; no collision
+	je clear_keys                ; no colision
 	mov al, bl
 clear_keys:
 	call print_brick
 	push ax
-	xor ah, ah                   ; remove key from buffer
+	xor ah, ah                   ; limpia el registro de tecla
 	int 0x16
 	pop ax
 no_key:
@@ -215,9 +215,9 @@ no_key:
 	loop wait_a
 
 	call clear_brick
-	inc dh                       ; increase row
+	inc dh                       ; incrementa la fila
 	call check_collision
-	je lp                        ; no collision
+	je lp                        ; no colision
 	dec dh
 	call print_brick
 	call check_filled
@@ -226,14 +226,14 @@ no_key:
 ; ------------------------------------------------------------------------------
 
 set_and_write:
-	mov ah, 2                    ; set cursor
+	mov ah, 2                    ; asigna el cursor
 	int 0x10
-	mov ax, 0x0920               ; write boxes
+	mov ax, 0x0920               ; escribe las cajas
 	int 0x10
 	ret
 
 set_and_read:
-	mov ah, 2                    ; set cursor position
+	mov ah, 2                    ; asigna la posicion del cursor
 	int 0x10
 	mov ah, 8                    ; read character and attribute, BH = 0
 	int 0x10                     ; result in AX
@@ -243,18 +243,18 @@ set_and_read:
 
 ; DH = current row
 %macro replace_current_row 0
-	pusha                           ; replace current row with row above
+	pusha                           ; cambia la fila actual por la fila de arriba
  	mov dl, inner_first_col
  	mov cx, inner_width
 cf_aa:
 	push cx
-	dec dh                          ; decrement row
+	dec dh                          ; decrementa la fila
 	call set_and_read
-	inc dh                          ; increment row
-	mov bl, ah                      ; color from AH to BL
+	inc dh                          ; incrementa la fila
+	mov bl, ah                      ; color de AH a BL
 	mov cl, 1
 	call set_and_write
-	inc dx                          ; next column
+	inc dx                          ; siguiente columna
 	pop cx
 	loop cf_aa
 	popa
@@ -262,28 +262,28 @@ cf_aa:
 
 check_filled:
 	pusha
-	mov dh, 21                       ; start at row 21
+	mov dh, 21                       ; comienza en la fila 21
 next_row:
-	dec dh                           ; decrement row
-	jz cf_done                       ; at row 0 we are done
+	dec dh                           ; decrementa la fila
+	jz cf_done                       ; finaliza en fila 0
 	xor bx, bx
 	mov cx, inner_width
-	mov dl, inner_first_col          ; start at first inner column
+	mov dl, inner_first_col          ; comienza en la primera columna interna
 cf_loop:
 	call set_and_read
-	shr ah, 4                        ; rotate to get background color in AH
-	jz cf_is_zero                    ; jmp if background color is 0
-	inc bx                           ; increment counter
-	inc dx                           ; go to next column
+	shr ah, 4                        ; rota para obtener el color de fondo
+	jz cf_is_zero                    ; salta si el color de fondo es cero
+	inc bx                           ; incrementa contador
+	inc dx                           ; sigue con la otra columna
 cf_is_zero:
 	loop cf_loop
-	cmp bl, inner_width              ; if counter is 12 full we found a full row
+	cmp bl, inner_width              ; si contador es 12 se tiene una fila llena
 	jne next_row
-replace_next_row:                    ; replace current row with rows above
+replace_next_row:                    ; reemplaza filas actuales por las de arriba
 	replace_current_row
-	dec dh                           ; replace row above ... and so on
+	dec dh                           ; reemplaza filas de arriba
 	jnz replace_next_row
-	call check_filled                ; check for other full rows
+	call check_filled                ; chequea por filas llenas
 cf_done:
 	popa
 	ret
@@ -292,12 +292,12 @@ clear_brick:
 	xor bx, bx
 	jmp print_brick_no_color
 print_brick:  ; al = 0AAAARR0
-	mov bl, al                   ; select the right color
+	mov bl, al                   ; selecciona el color correcto
 	shr bl, 3
 	inc bx
 	shl bl, 4
 print_brick_no_color:
-	inc bx                       ; set least significant bit
+	inc bx                       ; asigna el bit menos significativo
 	mov di, bx
 	jmp check_collision_main
 	; BL = color of brick
@@ -322,9 +322,9 @@ zz:
 
 	push ax
 	or di, di
-	jz ee                        ; we just want to check for collisions
-	pusha                        ; print space with color stored in DI
-	mov bx, di                   ; at position in DX
+	jz ee                        ; chequeo de colisiones
+	pusha                        ; pinta con el color de di
+	mov bx, di                   ; en posicion dx
 	xor al, al
 	mov cx, 1
 	call set_and_write
@@ -332,21 +332,21 @@ zz:
 	jmp is_zero_a
 ee:
 	call set_and_read
-	shr ah, 4                    ; rotate to get background color in AH
-	jz is_zero_a                 ; jmp if background color is 0
+	shr ah, 4                    ; rota para obtener el color de fondo
+	jz is_zero_a                 ; jsalta si el fondo es cero
 	inc bx
 is_zero_a:
 	pop ax
 
 is_zero:
-	shl ax, 1                    ; move to next bit in brick mask
-	inc dx                       ; move to next column
+	shl ax, 1                    ; pasa al siguiente bit en mascara de bloque
+	inc dx                       ; se mueve a la siguiente columna
 	loop zz
-	sub dl, 4                    ; reset column
-	inc dh                       ; move to next row
+	sub dl, 4                    ; reinicia columna
+	inc dh                       ; se mueve a siguiente fila
 	pop cx
 	loop cc
-	or bl, bl                    ; bl != 0 -> collision
+	or bl, bl                    ; bl != 0 -> colision
 	popa
 	ret
 

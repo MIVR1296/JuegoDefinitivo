@@ -220,7 +220,7 @@ no_tecla:
 	je lp                        ; si  no ocuurre una colision
 	dec dh
 	call imp_bloque
-	call check_filled
+	call comp_llenado
 	jmp nuevo_bloque
 
 ; ------------------------------------------------------------------------------
@@ -242,13 +242,13 @@ set_and_read:
 ; ------------------------------------------------------------------------------
 
 ;--------------------------------  MACRO #6  -------------------------------------------------------------
-;Macro-5: iniciar_pantalla
-;       Inicializa la pantalla
+;Macro-6: _cambio de fila
+;   cambia la fila actual por la fila de arriba
 ;-----------------------------------------------------------------------------------------------------------------
 
-; DH = current row
-%macro replace_current_row 0
-	pusha                           ; cambia la fila actual por la fila de arriba
+; DH = cambio de fila
+%macro cambio_fila_actual 0
+	pusha                          
  	mov dl, interior_primer_col
  	mov cx, ancho_interior
 cf_aa:
@@ -265,10 +265,10 @@ cf_aa:
 	popa
 %endmacro
 
-check_filled:
+comp_llenado:
 	pusha
 	mov dh, 21                       ; comienza en la fila 21
-next_row:
+fila_siguiente:
 	dec dh                           ; decrementa la fila
 	jz cf_done                       ; finaliza en fila 0
 	xor bx, bx
@@ -283,12 +283,12 @@ cf_loop:
 cf_is_zero:
 	loop cf_loop
 	cmp bl, ancho_interior              ; si contador es 12 se tiene una fila llena
-	jne next_row
+	jne fila_siguiente
 remplazar_fila_siguiente:                    ; reemplaza filas actuales por las de arriba
-	replace_current_row
+	cambio_fila_actual
 	dec dh                           ; reemplaza filas de arriba
 	jnz remplazar_fila_siguiente
-	call check_filled                ; chequea por filas llenas
+	call comp_llenado                ; chequea por filas llenas
 cf_done:
 	popa
 	ret

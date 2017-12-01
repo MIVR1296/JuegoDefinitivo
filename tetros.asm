@@ -185,24 +185,24 @@ wait_a:
 left_arrow:
 	dec dx
 	call check_collision
-	je clear_keys                 ; no colision
+	je clear_keys                 ; si  no ocurre una colisión
 	inc dx
 	jmp clear_keys
 right_arrow:
 	inc dx
 	call check_collision
-	je clear_keys                ; no colision
+	je clear_keys                ; si  no ocurre una colisión
 	dec dx
 	jmp clear_keys
 up_arrow:
 	mov bl, al
 	inc ax
 	inc ax
-	test al, 00000111b           ; check for overflow
-	jnz nf                       ; no overflow
+	test al, 00000111b           ; chequear el "overflow"
+	jnz nf                       ; si no hay desvordamiento
 	sub al, 8
 nf: call check_collision
-	je clear_keys                ; no colision
+	je clear_keys                ; si  no ocurre una colisión
 	mov al, bl
 clear_keys:
 	call print_brick
@@ -305,13 +305,13 @@ print_brick_no_color:
 	; return: flag
 check_collision:
 	mov di, 0
-check_collision_main:            ; DI = 1 -> check, 0 -> print
+check_collision_main:            ; DI = 1 -> chequear, 0 -> imprimir
 	pusha
-	xor bx, bx                   ; load the brick into AX
+	xor bx, bx                   ; Cargar el ladrillo en AX
 	mov bl, al
 	mov ax, word [bricks + bx]
 
-	xor bx, bx                   ; BH = page number, BL = collision counter
+	xor bx, bx                   ; BH = Número de página, BL = Contador de colisión
 	mov cx, 4
 cc:
 	push cx
@@ -350,8 +350,9 @@ is_zero:
 	popa
 	ret
 
-; ==============================================================================
-
+;****************************************************************************************
+;*                                  Ladrillos                                           *
+;****************************************************************************************
 bricks:
 	;  in AL      in AH
 	;  3rd + 4th  1st + 2nd row
@@ -369,18 +370,19 @@ bricks:
 	db 00000000b, 11100100b, 10000000b, 10001100b
 	db 00000000b, 01101100b, 01000000b, 10001100b
 	db 00000000b, 01101100b, 01000000b, 10001100b
+;*****************************************************************************************
 
 %ifndef DEBUG
-; It seems that I need a dummy partition table entry for my notebook.
+;  se necesita una entrada de tabla de partición ficticia para la portátil
 times 446-($-$$) db 0
-	db 0x80                   ; bootable
-    db 0x00, 0x01, 0x00       ; start CHS address
-    db 0x17                   ; partition type
-    db 0x00, 0x02, 0x00       ; end CHS address
+	db 0x80                   ; arranque
+    db 0x00, 0x01, 0x00       ; Iniciar Dirección CHS 
+    db 0x17                   ; Tipo de partición
+    db 0x00, 0x02, 0x00       ; finalizar dirección CHS 
     db 0x00, 0x00, 0x00, 0x00 ; LBA
-    db 0x02, 0x00, 0x00, 0x00 ; number of sectors
+    db 0x02, 0x00, 0x00, 0x00 ; numero de sectores
 
-; At the end we need the boot sector signature.
+; Al final necesitamos la firma del sector de arranque.
 times 510-($-$$) db 0
 	db 0x55
 	db 0xaa

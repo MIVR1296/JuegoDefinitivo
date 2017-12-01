@@ -10,7 +10,7 @@ En el isntante en que una fila es completada, ésta se elimina y las demás piez
 2) Abrir el terminal de linux (Ctrl+Alt+T)
 3) Ingresar a la carpeta en la que se encuentra el archivo .asm (cd ProyectoDefinitivo)
 4) Escribir en el terminal: nasm -f bin juego.asm -o juego.img
-5) Escribir en el terminal: qemu-system-i386 -drive file=juego.img,index=0,media=disk,format=raw
+5) Escribir en el terminal: qemu-system-i386 -drive file=tetros.img,index=0,media=disk,format=raw
 
 
 

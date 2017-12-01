@@ -217,7 +217,7 @@ no_key:
 	call clear_brick
 	inc dh                       ; incrementa la fila
 	call check_collision
-	je lp                        ; no colision
+	je lp                        ; si  no ocuurre una colision
 	dec dh
 	call print_brick
 	call check_filled
@@ -235,8 +235,8 @@ set_and_write:
 set_and_read:
 	mov ah, 2                    ; asigna la posicion del cursor
 	int 0x10
-	mov ah, 8                    ; read character and attribute, BH = 0
-	int 0x10                     ; result in AX
+	mov ah, 8                    ; Leer caracter y atributo, BH = 0
+	int 0x10                     ; resultado en AX
 	ret
 
 ; ------------------------------------------------------------------------------

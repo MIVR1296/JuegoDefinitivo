@@ -1,6 +1,6 @@
 # Descripción del Juego
 
-El juego está compuesto por diferentes ladrillos los cuales no se puede impedir su caída, pero sí su rotación (0°, 90°, 180°, 270°). El jugador puede controlar la posición y lugar en la que cae el bloque.
+El juego está compuesto por diferentes ladrillos los cuales no se puede impedir su caída, pero sí su rotación (0°, 90°, 180°, 270°). El jugador puede controlar la posición y lugar en la que cae el bloque mediante las direccionales del teclado y en caso de presionar cualquier otra tecla, la caída del ladrillo se acelera.
 
 En el isntante en que una fila es completada, ésta se elimina y las demás piezas decienden una posición por lo que permite liberar espacio. Si se llega a la fila más alta, entonces el juego finaliza.
 

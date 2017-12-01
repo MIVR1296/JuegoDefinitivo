@@ -1,23 +1,23 @@
 ;*******************************************************************************************
-;*                                    Juego Tetris                                         *
+;*                                    Juego Tetris                                                                                                                                                 *
 ;*******************************************************************************************
 	org 7c00h ;Con ORG se le indica al programa que debe iniciar en esta posición
 
 ;*******************************************************************************************
-;*                                    Creación de macros                                   *
+;*                                    Creación de macros                                                                                                                                *
 ;*******************************************************************************************
 
 ;--------------------------------  MACRO #1  -----------------------------------------------
-;Macro-1: print_reg .
+;Macro-1: imp_reg .
 ;	Recibe 1 parametro de entrada:
 ;		%1 es la direccion del registro a imprimir
 ;		
 ;--------------------------------------------------------------------------------------------
 
-%macro print_reg 1 
+%macro imp_reg 1 
 	mov dx, %1 ; mueva el parámetro de entrada al registro de datos "dx"
 	mov cx, 16 ; mueva el valor al registro contador "cx"
-print_reg_loop:
+imp_reg_loop:
 	push cx ; La instrucción PUSH decrementa en dos el valor deL registro apuntador de pila
 	;y posteriormente transfiere el contenido del operando fuente a la nueva dirección resultante en el registro recién modificado.
 	mov al, '0' ; mueve '0' a la parte baja del registro acomulador
@@ -29,9 +29,9 @@ print_reg_loop:
         ; sino que solo tiene efecto sobre el estado de las banderas
         ;____________________________________________________________________
        
-	jz print_reg_do ; Si la vandera es cero salta a la etiqueta print_reg_do
+	jz imp_reg_do ; Si la vandera es cero salta a la etiqueta imp_reg_do
 	mov al, '1' ;  mueve '1' a la parte baja del registro acomulador
-print_reg_do:
+imp_reg_do:
 	mov bx, 0x0006             ; página = 0 (BH), color = gris en negro (BL)
 	mov ah, 0x09               ; Escribir el caracter almacenado en AL
 	mov cx, 1                  ; Mueve el valor de 1 al registro contador
@@ -43,7 +43,7 @@ print_reg_do:
 	int 0x10		   ; Esta interrupción se utiliza para mostrar texto en la pantalla
 	pop cx                     ; Toma de la pila el último valor
 	shl dx, 1                  ; Desplazamiento de 1 bit a la izquierda
-	loop print_reg_loop        
+	loop imp_reg_loop        
 	jmp $
 %endmacro
 ;----------------------------------------------------------------------------------------------
@@ -58,22 +58,22 @@ print_reg_do:
 	mov dx, %1 ; mueve al registro de datos la entrada del macro
 	mov ah, 0x86 ; 	Esperar intervalo de microsegundos (BIOS)
 	int 0x15	 ; interrupción de tiempo
-	popa      ; extrae de la pila los registros básicos (orden ibversi ak pusha
+	popa      ; extrae de la pila los registros básicos (orden inverso al pusha
 %endmacro
 ;---------------------------------------------------------------------------------------------------------
 ;--------------------------------  MACRO #3  -------------------------------------------------------------
-;Macro-3: select_brick	
+;Macro-3: selecionar_bloque	
 ;       Selección de un bloque de manera aleatoria
 ;---------------------------------------------------------------------------------------------------------
-%macro select_brick 0
+%macro selecionar_bloque 0
 	mov ah, 2  ;  con la "int 0x1a" se obtiene la hora actual del sistema
 	int 0x1a
-	mov al, byte [seed_value]
+	mov al, byte [valor_semilla]
 	xor ax, dx
 	mov bl, 31
 	mul bx
 	inc ax ; La instrucción suma 1 al operando destino y guarda el resultado en el mismo operando destino.
-	mov byte [seed_value], al
+	mov byte [valor_semilla], al
 	xor dx, dx
 	mov bx, 7
 	div bx
@@ -84,10 +84,10 @@ print_reg_do:
 %endmacro
 ;---------------------------------------------------------------------------------------------------------
 ;--------------------------------  MACRO #4  -------------------------------------------------------------
-;Macro-4: clear_screen
+;Macro-4: limp_pantalla
 ;        Establece el modo de video y oculta el cursor
 ;---------------------------------------------------------------------------------------------------------
-%macro clear_screen 0
+%macro limp_pantalla 0
 	xor ax, ax   ; Limpia la pantalla de (40x25)
 	int 0x10     ; Esta interrupción se utiliza para mostrar texto en la pantalla
 	mov ah, 1    ; Ocultar el cursor
@@ -98,30 +98,30 @@ print_reg_do:
 ;*********************************************************************************************************
 ;*                                      Variables sin inicializar                                        *
 ;*********************************************************************************************************
-field_left_col:  equ 13  ; Columna izquierda
-field_width:     equ 14  
-inner_width:     equ 12
-inner_first_col: equ 14  ; primera columna
-start_row_col:   equ 0x0412 ;fila y columna
+campo_col_izq:  equ 13  ; Columna izquierda
+ancho_campo:     equ 14  
+ancho_interior:     equ 12
+interior_primer_col: equ 14  ; primera columna
+inicio_fila_col:   equ 0x0412 ; fila y columna
 ;*********************************************************************************************************
 ;--------------------------------  MACRO #5  -------------------------------------------------------------
-;Macro-5: Init_screen
+;Macro-5: iniciar_pantalla
 ;       Inicializa la pantalla
 ;---------------------------------------------------------------------------------------------------------
-%macro init_screen 0
-	clear_screen			 ; Se llama al macro para limpiar la pantalla
+%macro iniciar_pantalla 0
+	limp_pantalla			 ; Se llama al macro para limpiar la pantalla
 	mov dh, 3                        ; fila
 	mov cx, 18                       ; número de filas 
 ia: push cx				 ; 
 	inc dh                           ; incrementa la fila
-	mov dl, field_left_col           ; Establecer columna
-	mov cx, field_width              ; Ancho de caja
+	mov dl, campo_col_izq           ; Establecer columna
+	mov cx, ancho_campo              ; Ancho de caja
 	mov bx, 0x33                     ; color turquesa para los bordes del juego
 	call set_and_write
 	cmp dh, 21                       ; No eliminar la última línea
 	je ib                            ; Si llega a la última línea, salta
 	inc dx                           ; Incrementar la columna
-	mov cx, inner_width              ; Ancho de caja
+	mov cx, ancho_interior              ; Ancho de caja
 	xor bx, bx                       ; color
 	call set_and_write               
 ib: pop cx                               ; transfiere el último valor almacenado en la pila
@@ -129,10 +129,10 @@ ib: pop cx                               ; transfiere el último valor almacenad
 %endmacro
 ;---------------------------------------------------------------------------------------------------------
 ;*********************************************************************************************************
-;*                                            Variables sin inicializar                                  *
+;*                                            Variables sin inicializar                                                                                                                                                *
 ;*********************************************************************************************************
 delay:      equ 0x7f00
-seed_value: equ 0x7f02
+valor_semilla: equ 0x7f02
 ;*********************************************************************************************************
 
 ;*********************************************************************************************************
@@ -141,26 +141,26 @@ seed_value: equ 0x7f02
 section .text
 
 ;_________________________________________________________________________________________________________
-start_tetris:   ; Etiqueta para iniciar el juego
+iniciar_juego:   ; Etiqueta para iniciar el juego
 	xor ax, ax ; Limpieza del registro acomulador
 	mov ds, ax ; mueve lo que hay en el registro acomulador al registro de segmento de datos
-	init_screen ; Se llama al macro que inicializa la pantalla
+	iniciar_pantalla ; Se llama al macro que inicializa la pantalla
 ;_________________________________________________________________________________________________________
-new_brick: ; Etiqueta para crear un nuevo ladrillo
+nuevo_bloque: ; Etiqueta para crear un nuevo ladrillo
 	mov byte [delay], 100            ;  calculo para un delay de (3 * 100) 300ms
-	select_brick                     ; Devuelve el ladrillo seleccionado en AL
-	mov dx, start_row_col            ; inicia en la fila 4,  columna 38
+	selecionar_bloque                     ; Devuelve el ladrillo seleccionado en AL
+	mov dx, inicio_fila_col            ; inicia en la fila 4,  columna 38
 ;_________________________________________________________________________________________________________
 lp: ; Etiqueta para chequear la colisión y establecer se pierde la partida
-	call check_collision
+	call revisar_colision
 	jne $                            ; En caso de colisión se finaliza el juego
-	call print_brick	         ; Si no entonces se imprime otro bloque
+	call imp_bloque	         ; Si no entonces se imprime otro bloque
 ;________________________________________________________________________________________________________
-wait_or_keyboard: ; espera o teclado:
+esperar_tecla: ; 
 	xor cx, cx 
 	mov cl, byte [delay] 
 ;________________________________________________________________________________________________________
-wait_a:         
+esperar:         
 	push cx 
 	sleep 3000                       ; Se llama al macro para esperar 3ms
 
@@ -170,58 +170,58 @@ wait_a:
 	int 0x16                         ;  Esta interrupción se encarga de controlar el teclado del PC.
 	mov cx, ax
 	pop ax
-	jz no_key                    ; Si no se presiona una tecla
-	call clear_brick             ; llamada a al macro para borrar el ladrillo
+	jz no_tecla                    ; Si no se presiona una tecla
+	call borrar_bloque             ; llamada a al macro para borrar el ladrillo
                                      ; 4b left, 48 up, 4d right, 50 down
 	cmp ch, 0x4b                 ; flecha izquierda
-	je left_arrow                ; 
+	je flecha_izq                ; 
 	cmp ch, 0x48                 ; flecha derecha
-	je up_arrow
+	je flecha_arriba
 	cmp ch, 0x4d
-	je right_arrow               ; Salto a la etiqueta right_arrow 
+	je flecha_der               ; Salto a la etiqueta flecha_der 
 
 	mov byte [delay], 10         ; cualquier otra tecla es para bajar rápido el ladrillo
-	jmp clear_keys               ; salto a limpieza de tecla
-left_arrow:
+	jmp limpiar_tecla               ; salto a limpieza de tecla
+flecha_izq:
 	dec dx
-	call check_collision
-	je clear_keys                 ; si  no ocurre una colisión
+	call revisar_colision
+	je limpiar_tecla                 ; si  no ocurre una colisión
 	inc dx
-	jmp clear_keys
-right_arrow:
+	jmp limpiar_tecla
+flecha_der:
 	inc dx
-	call check_collision
-	je clear_keys                ; si  no ocurre una colisión
+	call revisar_colision
+	je limpiar_tecla                ; si  no ocurre una colisión
 	dec dx
-	jmp clear_keys
-up_arrow:
+	jmp limpiar_tecla
+flecha_arriba:
 	mov bl, al
 	inc ax
 	inc ax
 	test al, 00000111b           ; chequear el "overflow"
 	jnz nf                       ; si no hay desvordamiento
 	sub al, 8
-nf: call check_collision
-	je clear_keys                ; si  no ocurre una colisión
+nf: call revisar_colision
+	je limpiar_tecla                ; si  no ocurre una colisión
 	mov al, bl
-clear_keys:
-	call print_brick
+limpiar_tecla:
+	call imp_bloque
 	push ax
 	xor ah, ah                   ; limpia el registro de tecla
 	int 0x16
 	pop ax
-no_key:
+no_tecla:
 	pop cx
-	loop wait_a
+	loop esperar
 
-	call clear_brick
+	call borrar_bloque
 	inc dh                       ; incrementa la fila
-	call check_collision
+	call revisar_colision
 	je lp                        ; si  no ocuurre una colision
 	dec dh
-	call print_brick
+	call imp_bloque
 	call check_filled
-	jmp new_brick
+	jmp nuevo_bloque
 
 ; ------------------------------------------------------------------------------
 
@@ -241,11 +241,16 @@ set_and_read:
 
 ; ------------------------------------------------------------------------------
 
+;--------------------------------  MACRO #6  -------------------------------------------------------------
+;Macro-5: iniciar_pantalla
+;       Inicializa la pantalla
+;-----------------------------------------------------------------------------------------------------------------
+
 ; DH = current row
 %macro replace_current_row 0
 	pusha                           ; cambia la fila actual por la fila de arriba
- 	mov dl, inner_first_col
- 	mov cx, inner_width
+ 	mov dl, interior_primer_col
+ 	mov cx, ancho_interior
 cf_aa:
 	push cx
 	dec dh                          ; decrementa la fila
@@ -267,8 +272,8 @@ next_row:
 	dec dh                           ; decrementa la fila
 	jz cf_done                       ; finaliza en fila 0
 	xor bx, bx
-	mov cx, inner_width
-	mov dl, inner_first_col          ; comienza en la primera columna interna
+	mov cx, ancho_interior
+	mov dl, interior_primer_col          ; comienza en la primera columna interna
 cf_loop:
 	call set_and_read
 	shr ah, 4                        ; rota para obtener el color de fondo
@@ -277,39 +282,39 @@ cf_loop:
 	inc dx                           ; sigue con la otra columna
 cf_is_zero:
 	loop cf_loop
-	cmp bl, inner_width              ; si contador es 12 se tiene una fila llena
+	cmp bl, ancho_interior              ; si contador es 12 se tiene una fila llena
 	jne next_row
-replace_next_row:                    ; reemplaza filas actuales por las de arriba
+remplazar_fila_siguiente:                    ; reemplaza filas actuales por las de arriba
 	replace_current_row
 	dec dh                           ; reemplaza filas de arriba
-	jnz replace_next_row
+	jnz remplazar_fila_siguiente
 	call check_filled                ; chequea por filas llenas
 cf_done:
 	popa
 	ret
 
-clear_brick:
+borrar_bloque:
 	xor bx, bx
-	jmp print_brick_no_color
-print_brick:  ; al = 0AAAARR0
+	jmp imp_bloque_no_color
+imp_bloque:  ; al = 0AAAARR0
 	mov bl, al                   ; selecciona el color correcto
 	shr bl, 3
 	inc bx
 	shl bl, 4
-print_brick_no_color:
+imp_bloque_no_color:
 	inc bx                       ; asigna el bit menos significativo
 	mov di, bx
-	jmp check_collision_main
+	jmp revisar_colision_main
 	; BL = color of brick
 	; DX = position (DH = row), AL = brick offset
 	; return: flag
-check_collision:
+revisar_colision:
 	mov di, 0
-check_collision_main:            ; DI = 1 -> chequear, 0 -> imprimir
+revisar_colision_main:            ; DI = 1 -> chequear, 0 -> imprimir
 	pusha
 	xor bx, bx                   ; Cargar el ladrillo en AX
 	mov bl, al
-	mov ax, word [bricks + bx]
+	mov ax, word [bloques + bx]
 
 	xor bx, bx                   ; BH = Número de página, BL = Contador de colisión
 	mov cx, 4
@@ -351,11 +356,11 @@ is_zero:
 	ret
 
 ;****************************************************************************************
-;*                                  Ladrillos                                           *
+;*                                  Ladrillos                                                                                                                                                   *
 ;****************************************************************************************
-bricks:
-	;  in AL      in AH
-	;  3rd + 4th  1st + 2nd row
+bloques:
+	;  en AL      en AH
+	;  3era + 4ta  1er + 2da fila
 	db 01000100b, 01000100b, 00000000b, 11110000b
 	db 01000100b, 01000100b, 00000000b, 11110000b
 	db 01100000b, 00100010b, 00000000b, 11100010b
